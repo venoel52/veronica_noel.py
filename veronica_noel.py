@@ -1,85 +1,83 @@
+import random
 import csv
-import os
+import statistics
 
-# registrar una nueva propiedad
+trabajadores = ["Juan Pérez", "María García", "Carlos López", "Ana Martínez", "Pedro Rodríguez","Laura Hernández", "Miguel Sánchez", "Isabel Gómez", "Francisco Díaz", "Elena Fernández"]
 
-def registrar_propiedad():
-    correlativo = input("Ingrese correlativo: ")
-    tipo_propiedad = input("Ingrese tipo de propiedad (1 = Casa, 2 = Departamento): ")
-    nro_dormitorios = input("Ingrese número de dormitorios: ")
-    nro_banos = input("Ingrese número de baños: ")
-    precio = input("Ingrese el precio: ")
-
-# validacion y escritura en el archivo CSV
+sueldos = []
+# generar sueldos
+def generar_sueldos_aleatorios():
+    global sueldos
+    sueldos = [random.randint(300000, 2500000) for _ in range(10)]
+# clasificar sueldos
+def clasificar_sueldos():
+    print("Sueldos menores a $800.000")
+    print("Total:", len([s for s in sueldos if s < 800000]))
+    print("Nombre empleado\tSueldo")
+    for i in range(len(trabajadores)):
+        if sueldos[i] < 800000:
+            print(f"{trabajadores[i]}\t${sueldos[i]}")
     
-    try:
-        with open('REGISTRO_PROPIEDADES_USADAS.csv', mode='a', newline='') as file:
-            writer = csv.writer(file)
-            writer.writerow([correlativo, 
-                             "Casa" if tipo_propiedad == '1' else "Departamento", 
-                             nro_dormitorios, 
-                             nro_banos, 
-                             precio])
-        print("Propiedad registrada correctamente.")
-    except IOError:
-        print("Error al intentar escribir en el archivo.")
+    print("\nSueldos entre $800.000 y $2.000.000")
+    print("Total:", len([s for s in sueldos if 800000 <= s <= 2000000]))
+    print("Nombre empleado\tSueldo")
+    for i in range(len(trabajadores)):
+        if 800000 <= sueldos[i] <= 2000000:
+            print(f"{trabajadores[i]}\t${sueldos[i]}")
+    
+    print("\nSueldos superiores a $2.000.000")
+    print("TOTAL:", len([s for s in sueldos if s > 2000000]))
+    print("Nombre empleado\tSueldo")
+    for i in range(len(trabajadores)):
+        if sueldos[i] > 2000000:
+            print(f"{trabajadores[i]}\t${sueldos[i]}")
+    
+    print("\nTOTAL SUELDOS: $", sum(sueldos))
+# estadisticas
+def ver_estadisticas():
+    print("Sueldo más alto:", max(sueldos))
+    print("Sueldo más bajo:", min(sueldos))
+    print("Promedio de sueldos:", sum(sueldos) / len(sueldos))
+    print("Media geométrica:", statistics.geometric_mean(sueldos))
+# ver sueldos 
+def generar_reporte_sueldos():
+    with open('reporte_sueldos.csv', 'w', newline='') as file:
+        writer = csv.writer(file)
+        writer.writerow(["Nombre empleado", "Sueldo Base", "Descuento Salud", "Descuento AFP", "Sueldo Líquido"])
+        for i in range(len(trabajadores)):
+            sueldo_base = sueldos[i]
+            desc_salud = sueldo_base * 0.07
+            desc_afp = sueldo_base * 0.12
+            sueldo_liquido = sueldo_base - desc_salud - desc_afp
+            writer.writerow([trabajadores[i], sueldo_base, desc_salud, desc_afp, sueldo_liquido])
+    
+    print("Archivo 'reporte_sueldos.csv' generado correctamente.")
 
-# listar todas las propiedades
-        
-def listar_propiedades():
-    try:
-        with open('REGISTRO_PROPIEDADES_USADAS.csv', mode='r') as file:
-            reader = csv.reader(file)
-            print("{:<15} {:<20} {:<20} {:<15} {:<10}".format("CORRELATIVO", "TIPO-DE-PROPIEDAD", 
-                                                              "NRO-DE-DORMITORIOS", "NRO-DE-BAÑOS", "PRECIO"))
-            for row in reader:
-                print("{:<15} {:<20} {:<20} {:<15} {:<10}".format(row[0], row[1], row[2], row[3], row[4]))
-    except IOError:
-        print("Error al intentar leer el archivo.")
-
-#  imprimir oferta por tipo de propiedad
-        
-def imprimir_oferta_por_tipo(tipo):
-    tipo_texto = "Casa" if tipo == '2' else "Departamento"
-    archivo_salida = f'PROPIEDADES_{tipo_texto.upper()}.csv'
-
-    try:
-        with open('REGISTRO_PROPIEDADES_USADAS.csv', mode='r') as file:
-            reader = csv.reader(file)
-            with open(archivo_salida, mode='w', newline='') as out_file:
-                writer = csv.writer(out_file)
-                writer.writerow(["Correlativo", "tipo-propiedad", "nro-de-dormitorios", "nro-de-baños", "precio"])
-                for row in reader:
-                    if row[1] == tipo_texto:
-                        writer.writerow(row)
-        print(f"Archivo {archivo_salida} generado correctamente.")
-    except IOError:
-        print("Error al intentar leer/escribir el archivo.")
-
-# menu
-def menu():
+# MENU
+if __name__ == "__main__":
     while True:
-        print("\n==== Menú Principal ====")
-        print("1. Registrar propiedad")
-        print("2. Listar propiedades")
-        print("3. Imprimir oferta por tipo de propiedad")
-        print("4. Salir")
-
+        print("\n===== MENÚ =====")
+        print("1. Asignar sueldos aleatorios")
+        print("2. Clasificar sueldos")
+        print("3. Ver estadísticas")
+        print("4. Reporte de sueldos")
+        print("5. Salir del programa")
+        
         opcion = input("Seleccione una opción: ")
-
+        
         if opcion == '1':
-            registrar_propiedad()
+            generar_sueldos_aleatorios()
+            print("Sueldos generados aleatoriamente.")
         elif opcion == '2':
-            listar_propiedades()
+            clasificar_sueldos()
         elif opcion == '3':
-            tipo = input("Seleccione tipo de propiedad (1 = Departamento, 2 = Casa): ")
-            imprimir_oferta_por_tipo(tipo)
+            ver_estadisticas()
         elif opcion == '4':
-            print("Saliendo del programa...")
+            generar_reporte_sueldos()
+        elif opcion == '5':
+            print("Salida exitosa ¡Que tenga buen día!")
+            print("""   Desarrollado por Veronica Noel
+                RUT: 25.576.384-9""")
             break
         else:
-            print("Opción no válida. Intente nuevamente.")
-
-if __name__ == "__main__":
-    menu()
-
+            print("Opción inválida, seleccione una opción válida por favor.")
